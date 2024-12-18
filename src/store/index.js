@@ -109,6 +109,7 @@ const store = new Vuex.Store({
           commit("SET_CHECKOUT_STATUS", "FAILED");
         }
       );
+      console.log("checkout: ", state);
     },
   },
 

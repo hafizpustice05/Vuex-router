@@ -24,7 +24,7 @@
 // import store from "@/store/index"; :disabled="!productIsInStock(product)"
 
 import ShoppingCart from "./../components/ShoppingCart.vue";
-
+import { mapActions, mapGetters, mapState } from "vuex";
 export default {
   components: {
     ShoppingCart,
@@ -37,27 +37,38 @@ export default {
   },
 
   methods: {
-    addProductToCart(product) {
-      this.$store.dispatch("addProductToCart", product);
-    },
+    ...mapActions({
+      fetchProducts: "fetchProduct",
+      addProductToCart: "addProductToCart",
+    }),
+
+    // addProductToCart(product) {
+    //   this.$store.dispatch("addProductToCart", product);
+    // },
   },
 
   computed: {
-    products() {
-      return this.$store.state.products;
-      //   return this.$store.getters.availableProducts;
-    },
-    productIsInStock() {
-      return this.$store.getters.productIsInStock;
-    },
+    ...mapState({
+      products: (state) => state.products, // this is alternate of products method
+    }),
+    // products() {
+    //   // return this.$store.state.products;
+    //   return this.$store.getters.availableProducts;
+    // },
+
+    ...mapGetters({
+      productIsInStock: "productIsInStock",
+    }),
+
+    // productIsInStock() {
+    //   return this.$store.getters.productIsInStock;
+    // },
   },
 
   created() {
     this.loading = true;
-    this.$store
-      .dispatch("fetchProduct")
-      .then(() => (this.loading = false))
-      .catch(() => (this.loading = false));
+    // this.$store.dispatch("fetchProduct").then(() => (this.loading = false));
+    this.fetchProducts().then(() => (this.loading = false));
     this.loading = false;
   },
 };
