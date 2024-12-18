@@ -49,7 +49,7 @@ export default {
 
   computed: {
     ...mapState({
-      products: (state) => state.products, // this is alternate of products method
+      products: (state) => state.product.items, // this is alternate of products method
     }),
     // products() {
     //   // return this.$store.state.products;
