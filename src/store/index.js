@@ -10,24 +10,24 @@ const store = new Vuex.Store({
     products: [],
     // {id, quantity}
     cart: [],
-    checkoutStatus: null
+    checkoutStatus: null,
   },
 
   getters: {
     availableProducts(state, getters) {
-      return state.products.filter(product => product.inventory > 0);
+      return state.products.filter((product) => product.inventory > 0);
     },
 
     cartProducts(state) {
-      return state.cart.map(cartItem => {
+      return state.cart.map((cartItem) => {
         console.log("cartItem: ", cartItem);
         const product = state.products.find(
-          product => product.id == cartItem.id
+          (product) => product.id == cartItem.id
         );
         return {
           title: product.title,
           price: product.price,
-          quantity: cartItem.quantity
+          quantity: cartItem.quantity,
         };
       });
     },
@@ -43,7 +43,12 @@ const store = new Vuex.Store({
         (total, product) => total + product.price * product.quantity,
         0
       );
-    }
+    },
+    productIsInStock() {
+      return (product) => {
+        return product.inventory > 0;
+      };
+    },
   },
 
   actions: {
@@ -55,27 +60,44 @@ const store = new Vuex.Store({
 
     fetchProduct({ commit }) {
       return new Promise((resolve, reject) => {
-        shop.getProducts(products => {
+        shop.getProducts((products) => {
           commit("SET_PRODUCTS", products);
           resolve();
         });
       });
     },
 
-    addProductToCart(context, product) {
-      if (product.inventory > 0) {
+    // addProductToCart(context, product) {
+    //   if (context.getters.productIsInStock(product)) {
+    //     //find cart item
+    //     const cartItem = context.state.cart.find(
+    //       (item) => item.id == product.id
+    //     );
+
+    //     if (!cartItem) {
+    //       context.commit("PUSH_PRODUCT_TO_CART", product.id);
+    //     } else {
+    //       context.commit("INCREMNET_ITEM_QUANTITY", cartItem);
+    //     }
+
+    //     context.commit("DECREMENT_PRODUCT_INVENTORY", product);
+    //   }
+    // },
+    addProductToCart({ state, commit, getters }, product) {
+      if (getters.productIsInStock(product)) {
         //find cart item
-        const cartItem = context.state.cart.find(item => item.id == product.id);
+        const cartItem = state.cart.find((item) => item.id == product.id);
 
         if (!cartItem) {
-          context.commit("PUSH_PRODUCT_TO_CART", product.id);
+          commit("PUSH_PRODUCT_TO_CART", product.id);
         } else {
-          context.commit("INCREMNET_ITEM_QUANTITY", cartItem);
+          commit("INCREMNET_ITEM_QUANTITY", cartItem);
         }
 
-        context.commit("DECREMENT_PRODUCT_INVENTORY", product);
+        commit("DECREMENT_PRODUCT_INVENTORY", product);
       }
     },
+
     checkOut({ state, commit }) {
       shop.buyProducts(
         state.cart,
@@ -87,7 +109,7 @@ const store = new Vuex.Store({
           commit("SET_CHECKOUT_STATUS", "FAILED");
         }
       );
-    }
+    },
   },
 
   mutations: {
@@ -113,8 +135,8 @@ const store = new Vuex.Store({
     },
     EMPTY_CART(state) {
       state.cart = [];
-    }
-  }
+    },
+  },
 });
 
 export default store;

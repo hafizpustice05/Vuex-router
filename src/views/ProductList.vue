@@ -6,7 +6,10 @@
       <li v-for="product in products">
         {{ product.title }} - {{ product.price }} -
         {{ product.inventory }}
-        <button @click="addProductToCart(product)">
+        <button
+          :disabled="!productIsInStock(product)"
+          @click="addProductToCart(product)"
+        >
           Add to cart
         </button>
       </li>
@@ -24,11 +27,11 @@ import ShoppingCart from "./../components/ShoppingCart.vue";
 
 export default {
   components: {
-    ShoppingCart
+    ShoppingCart,
   },
   data() {
     return {
-      loading: false
+      loading: false,
       //   products: [],
     };
   },
@@ -36,20 +39,27 @@ export default {
   methods: {
     addProductToCart(product) {
       this.$store.dispatch("addProductToCart", product);
-    }
+    },
   },
 
   computed: {
     products() {
       return this.$store.state.products;
       //   return this.$store.getters.availableProducts;
-    }
+    },
+    productIsInStock() {
+      return this.$store.getters.productIsInStock;
+    },
   },
 
   created() {
     this.loading = true;
-    this.$store.dispatch("fetchProduct").then(() => (this.loading = false));
-  }
+    this.$store
+      .dispatch("fetchProduct")
+      .then(() => (this.loading = false))
+      .catch(() => (this.loading = false));
+    this.loading = false;
+  },
 };
 </script>
 
